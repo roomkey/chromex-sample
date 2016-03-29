@@ -28,7 +28,10 @@
 (defn run-client-message-loop! [client]
   (go-loop []
     (when-let [message (<! client)]
-      (log "BACKGROUND: got client message:" message "from" (get-sender client))
+      (log message)
+      (case (:type message)
+        "log" (log "BACKGROUND: log request with data:" (:data message))
+        nil)
       (recur))
     (remove-client! client)))
 
