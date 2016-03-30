@@ -32,8 +32,8 @@
   (let [message-element (.querySelector js/document ".rk-hotels-search-title")
         msg (str "CONTENT SCRIPT: document '" (.-innerHTML message-element) "' contains " script-count " script tags.")]
     (log msg)
-    (post-message! background-port {:type "log"
-                                    :data msg})))
+    (post-message! background-port  (clj->js {:type "log"
+                                              :data msg}))))
 
 (defn connect-to-background-page! []
   (let [background-port (runtime/connect)]

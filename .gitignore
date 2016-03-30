@@ -9,3 +9,6 @@
 /checkouts
 /.tmp
 .figwheel_server.log
+pom.xml
+pom.xml.asc
+.nrepl-port

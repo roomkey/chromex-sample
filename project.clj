@@ -39,7 +39,8 @@
                                            :compiler-stats        true
                                            :cache-analysis        true
                                            :source-map            true
-                                           :source-map-timestamp  true}}
+                                           :source-map-timestamp  true}
+                            :figwheel {:on-jsload "chromex-sample.dev.auto-reload/reloaded"}}
                            :popup
                            {:source-paths ["src/dev"
                                            "src/figwheel"

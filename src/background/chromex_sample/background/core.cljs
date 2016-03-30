@@ -12,6 +12,11 @@
 
 (def clients (atom []))
 
+(defn parse-message [msg]
+  (if (object? msg)
+    (js->clj msg)
+    msg))
+
 ; -- clients manipulation ---------------------------------------------------------------------------------------------------
 
 (defn add-client! [client]
@@ -27,11 +32,8 @@
 
 (defn run-client-message-loop! [client]
   (go-loop []
-    (when-let [message (<! client)]
-      (log message)
-      (case (:type message)
-        "log" (log "BACKGROUND: log request with data:" (:data message))
-        nil)
+    (when-let [message (parse-message (<! client))]
+      (log "Get Data: " (get message "data"))
       (recur))
     (remove-client! client)))
 
