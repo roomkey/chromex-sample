@@ -20,7 +20,7 @@
 ; -- clients manipulation ---------------------------------------------------------------------------------------------------
 
 (defn add-client! [client]
-  (log "BACKGROUND: client connected" (get-sender client))
+  (log "BACKGROUND: client connected !" (get-sender client))
   (swap! clients conj client))
 
 (defn remove-client! [client]
