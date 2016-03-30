@@ -27,46 +27,45 @@
 
   :profiles {:unpacked
              {:cljsbuild {:builds
-                          {:background
-                           {:source-paths ["src/dev"
-                                           "src/figwheel"
-                                           "src/background"]
-                            :compiler     {:output-to             "resources/unpacked/compiled/background/chromex-sample.js"
-                                           :output-dir            "resources/unpacked/compiled/background"
-                                           :asset-path            "compiled/background"
-                                           :optimizations         :none
-                                           :anon-fn-naming-policy :unmapped
-                                           :compiler-stats        true
-                                           :cache-analysis        true
-                                           :source-map            true
-                                           :source-map-timestamp  true}
-                            :figwheel {:on-jsload "chromex-sample.dev.auto-reload/reloaded"}}
-                           :popup
-                           {:source-paths ["src/dev"
-                                           "src/figwheel"
-                                           "src/popup"]
-                            :compiler     {:output-to             "resources/unpacked/compiled/popup/chromex-sample.js"
-                                           :output-dir            "resources/unpacked/compiled/popup"
-                                           :asset-path            "compiled/popup"
-                                           :optimizations         :none
-                                           :anon-fn-naming-policy :unmapped
-                                           :compiler-stats        true
-                                           :cache-analysis        true
-                                           :source-map            true
-                                           :source-map-timestamp  true}}
-                           :content-script
-                           {:source-paths ["src/dev"
-                                           "src/content_script"]
-                            :compiler     {:output-to             "resources/unpacked/compiled/content_script/chromex-sample.js"
-                                           :output-dir            "resources/unpacked/compiled/content_script"
-                                           :asset-path            "compiled/content_script"
-                                           :optimizations         :whitespace                                                 ; content scripts cannot do eval / load script dynamically
-                                           :anon-fn-naming-policy :unmapped
-                                           :pretty-print          true
-                                           :compiler-stats        true
-                                           :cache-analysis        true
-                                           :source-map            "resources/unpacked/compiled/content_script/chromex-sample.js.map"
-                                           :source-map-timestamp  true}}}}}
+                          {:background {:source-paths ["src/dev"
+                                                       "src/figwheel"
+                                                       "src/background"]
+                                        :compiler     {:output-to             "resources/unpacked/compiled/background/chromex-sample.js"
+                                                       :output-dir            "resources/unpacked/compiled/background"
+                                                       :asset-path            "compiled/background"
+                                                       :optimizations         :none
+                                                       :anon-fn-naming-policy :unmapped
+                                                       :compiler-stats        true
+                                                       :cache-analysis        true
+                                                       :source-map            true
+                                                       :source-map-timestamp  true}
+                                        :figwheel {:on-jsload "chromex-sample.dev.auto-reload/reloaded"}}
+                           :popup {:source-paths ["src/dev"
+                                                  "src/figwheel"
+                                                  "src/popup"]
+                                   :compiler     {:output-to             "resources/unpacked/compiled/popup/chromex-sample.js"
+                                                  :output-dir            "resources/unpacked/compiled/popup"
+                                                  :asset-path            "compiled/popup"
+                                                  :optimizations         :none
+                                                  :anon-fn-naming-policy :unmapped
+                                                  :compiler-stats        true
+                                                  :cache-analysis        true
+                                                  :source-map            true
+                                                  :source-map-timestamp  true}
+                                   :figwheel {:on-jsload "chromex-sample.dev.auto-reload/reloaded"}}
+                           :content-script {:source-paths ["src/dev"
+                                                           "src/content_script"]
+                                            :compiler     {:output-to             "resources/unpacked/compiled/content_script/chromex-sample.js"
+                                                           :output-dir            "resources/unpacked/compiled/content_script"
+                                                           :asset-path            "compiled/content_script"
+                                                           :optimizations         :whitespace                                                 ; content scripts cannot do eval / load script dynamically
+                                                           :anon-fn-naming-policy :unmapped
+                                                           :pretty-print          true
+                                                           :compiler-stats        true
+                                                           :cache-analysis        true
+                                                           :source-map            "resources/unpacked/compiled/content_script/chromex-sample.js.map"
+                                                           :source-map-timestamp  true}
+                                            :figwheel {:on-jsload "chromex-sample.dev.auto-reload/reloaded"}}}}}
              :checkouts
              {:cljsbuild {:builds
                           {:background     {:source-paths ["checkouts/chromex/src/lib"
