@@ -3,7 +3,22 @@
   (:require [cljs.core.async :refer [<!]]
             [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
-            [chromex.ext.runtime :as runtime :refer-macros [connect]]))
+            [chromex.ext.runtime :as runtime :refer-macros [connect]]
+            [dommy.core :as dommy :refer-macros [sel1]]))
+
+;; Helpers for message sending & receiving
+;; Need to put in some common namespace
+(defn msg-> [msg]
+  (if (string? msg)
+    msg
+    (clj->js msg)))
+
+(defn <-msg [msg]
+  (if (string? msg)
+    msg
+    (js->clj msg)))
+
+
 
 ; -- a message loop ---------------------------------------------------------------------------------------------------------
 
@@ -14,30 +29,20 @@
   (log "CONTENT SCRIPT: starting message loop...")
   (go-loop []
     (when-let [message (<! message-channel)]
-      (process-message! message)
+      (process-message! (<-msg message))
       (recur))
     (log "CONTENT SCRIPT: leaving message loop")))
 
 ; -- a simple page analysis  ------------------------------------------------------------------------------------------------
 
-; (defn do-page-analysis! [background-port]
-;   (let [script-elements (.getElementsByTagName js/document "script")
-;         script-count (.-length script-elements)
-;         title (.-title js/document)
-;         msg (str "CONTENT SCRIPT: document '" title "' contains " script-count " script tags.")]
-;     (log msg)
-;     (post-message! background-port msg)))
-
 (defn do-page-analysis! [background-port]
-  (let [message-element (.querySelector js/document ".rk-hotels-search-title")
-        msg (str "CONTENT SCRIPT: document '" (.-innerHTML message-element) "' contains " script-count " script tags.")]
-    (log msg)
-    (post-message! background-port  (clj->js {:type "log"
-                                              :data msg}))))
+  (when-let [scraped (dommy/text (sel1 ".rk-hotels-search-title"))]
+    (post-message! background-port (msg-> {:type "scrape"
+                                           :data scraped}))))
 
 (defn connect-to-background-page! []
   (let [background-port (runtime/connect)]
-    (post-message! background-port "hello from CONTENT SCRIPT! 3")
+    (post-message! background-port (msg-> "hello from CONTENT SCRIPT! 3"))
     (run-message-loop! background-port)
     (do-page-analysis! background-port)))
 

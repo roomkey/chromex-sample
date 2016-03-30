@@ -12,28 +12,43 @@
 
 (def clients (atom []))
 
-(defn parse-message [msg]
-  (if (object? msg)
-    (js->clj msg)
-    msg))
+;; Helpers for message sending & receiving
+;; Need to put in some common namespace
+(defn msg-> [msg]
+  (if (string? msg)
+    msg
+    (clj->js msg)))
+
+(defn <-msg [msg]
+  (if (string? msg)
+    msg
+    (js->clj msg)))
+
+
+(defn api-request [data]
+  (log "make api request: " data))
+
 
 ; -- clients manipulation ---------------------------------------------------------------------------------------------------
 
 (defn add-client! [client]
-  (log "BACKGROUND: client connected !" (get-sender client))
+  ; (log "BACKGROUND: client connected" (get-sender client))
   (swap! clients conj client))
 
 (defn remove-client! [client]
-  (log "BACKGROUND: client disconnected" (get-sender client))
+  ; (log "BACKGROUND: client disconnected" (get-sender client))
   (let [remove-item (fn [coll item] (remove #(identical? item %) coll))]
     (swap! clients remove-item client)))
+
 
 ; -- client event loop ------------------------------------------------------------------------------------------------------
 
 (defn run-client-message-loop! [client]
   (go-loop []
-    (when-let [message (parse-message (<! client))]
-      (log "Get Data: " (get message "data"))
+    (when-let [message (<-msg (<! client))]
+      (case (get message "type")
+        "scrape" (api-request (get message "data"))
+        nil)
       (recur))
     (remove-client! client)))
 
@@ -41,17 +56,17 @@
 
 (defn handle-client-connection! [client]
   (add-client! client)
-  (post-message! client "hello from BACKGROUND PAGE!")
+  (post-message! client (msg-> "hello from BACKGROUND PAGE!"))
   (run-client-message-loop! client))
 
 (defn tell-clients-about-new-tab! []
   (doseq [client @clients]
-    (post-message! client "a new tab was created")))
+    (post-message! client (msg-> "a new tab was created"))))
 
 ; -- main event loop --------------------------------------------------------------------------------------------------------
 
 (defn process-chrome-event [event-num event]
-  (log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
+  ; (log (gstring/format "BACKGROUND: got chrome event (%05d)" event-num) event)
   (let [[event-id event-args] event]
     (case event-id
       ::runtime/on-connect (apply handle-client-connection! event-args)
@@ -59,12 +74,12 @@
       nil)))
 
 (defn run-chrome-event-loop! [chrome-event-channel]
-  (log "BACKGROUND: starting main event loop...")
+  ; (log "BACKGROUND: starting main event loop...")
   (go-loop [event-num 1]
     (when-let [event (<! chrome-event-channel)]
       (process-chrome-event event-num event)
-      (recur (inc event-num)))
-    (log "BACKGROUND: leaving main event loop")))
+      (recur (inc event-num)))))
+    ; (log "BACKGROUND: leaving main event loop")))
 
 (defn boot-chrome-event-loop! []
   (let [chrome-event-channel (make-chrome-event-channel (chan))]
