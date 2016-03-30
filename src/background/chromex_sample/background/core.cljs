@@ -12,19 +12,8 @@
 
 (def clients (atom []))
 
-;; Helpers for message sending & receiving
-;; Need to put in some common namespace
-(defn msg-> [msg]
-  (if (string? msg)
-    msg
-    (clj->js msg)))
 
-(defn <-msg [msg]
-  (if (string? msg)
-    msg
-    (js->clj msg)))
-
-
+; -- api request ------------------------------------------------------------------------------------------------------------
 (defn api-request [data]
   (log "make api request: " data))
 
@@ -45,23 +34,29 @@
 
 (defn run-client-message-loop! [client]
   (go-loop []
-    (when-let [message (<-msg (<! client))]
-      (case (get message "type")
-        "scrape" (api-request (get message "data"))
-        nil)
-      (recur))
-    (remove-client! client)))
+    (when-let [message (js->clj (<! client))]
+      (let [type (get message "type")
+            data (get message "data")]
+        (case type
+          "scrape" (api-request data)
+          "log" (log data)
+          nil))
+        (recur))
+      (remove-client! client)))
+
 
 ; -- event handlers ---------------------------------------------------------------------------------------------------------
 
 (defn handle-client-connection! [client]
   (add-client! client)
-  (post-message! client (msg-> "hello from BACKGROUND PAGE!"))
+  (post-message! client (clj->js {:type "log"
+                                  :data "hello from BACKGROUND PAGE!"}))
   (run-client-message-loop! client))
 
 (defn tell-clients-about-new-tab! []
   (doseq [client @clients]
-    (post-message! client (msg-> "a new tab was created"))))
+    (post-message! client (clj->js {:type "log"
+                                    :data "a new tab was created"}))))
 
 ; -- main event loop --------------------------------------------------------------------------------------------------------
 
