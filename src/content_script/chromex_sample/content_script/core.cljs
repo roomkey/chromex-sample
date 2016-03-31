@@ -4,7 +4,7 @@
             [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
             [chromex.ext.runtime :as runtime :refer-macros [connect]]
-            [dommy.core :as dommy :refer-macros [sel1]]))
+            [dommy.core :as dommy :refer-macros [sel sel1]]))
 
 
 ; -- a message loop ---------------------------------------------------------------------------------------------------------
@@ -29,16 +29,20 @@
 ; -- a simple page analysis  ------------------------------------------------------------------------------------------------
 
 (defn do-page-analysis! [background-port]
-  (when-let [scraped (dommy/text (sel1 ".rk-hotels-search-title"))]
+  (when-let [scraped (first (sel [".rk-cover-image .container h2"]))]
     (post-message! background-port (clj->js {:type "scrape"
-                                             :data scraped}))))
+                                             :data (dommy/text scraped)}))))
 
 (defn connect-to-background-page! []
   (let [background-port (runtime/connect)]
     (post-message! background-port (clj->js {:type "log"
                                              :data "hello from CONTENT SCRIPT! 3"}))
     (run-message-loop! background-port)
-    (do-page-analysis! background-port)))
+
+    ;; Artificial timeout so that element exists
+    ;; Would of course have a better way of waiting
+    ;; for an element to exist prior to scraping
+    (.setTimeout js/window #(do-page-analysis! background-port) 3000)))
 
 ; -- main entry point -------------------------------------------------------------------------------------------------------
 

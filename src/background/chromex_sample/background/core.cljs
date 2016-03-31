@@ -8,14 +8,30 @@
             [chromex.protocols :refer [post-message! get-sender]]
             [chromex.ext.tabs :as tabs]
             [chromex.ext.runtime :as runtime]
-            [chromex-sample.background.storage :refer [test-storage!]]))
+            [chromex-sample.background.storage :refer [test-storage!]]
+            [ajax.core :refer [GET]]))
 
 (def clients (atom []))
 
 
 ; -- api request ------------------------------------------------------------------------------------------------------------
-(defn api-request [data]
-  (log "make api request: " data))
+
+(def request-url "http://www.roomkey.com/j/autofill")
+
+(defn handle-api-success [{:keys [_ locations airports]} client]
+  (log "locations" locations))
+
+(defn handle-api-error [client {:keys [status status-text]}]
+  (log "Uh oh: " status " " status-text))
+
+(defn api-request [client]
+  (log "make api request for client" client)
+  (GET request-url
+       {:params {:query "ch"}
+        :handler #(handle-api-success % client)
+        :error-handler #(handle-api-error % client)
+        :response-format :json
+        :keywords? true}))
 
 
 ; -- clients manipulation ---------------------------------------------------------------------------------------------------
@@ -38,7 +54,9 @@
       (let [type (get message "type")
             data (get message "data")]
         (case type
-          "scrape" (api-request data)
+          "scrape" (do
+                    (log "Scrape success:" data)
+                    (api-request client))
           "log" (log data)
           nil))
         (recur))
