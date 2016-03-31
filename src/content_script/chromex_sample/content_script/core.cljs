@@ -6,6 +6,24 @@
             [chromex.ext.runtime :as runtime :refer-macros [connect]]
             [dommy.core :as dommy :refer-macros [sel sel1]]))
 
+; -- DOM manipulation -------------------------------------------------------------------------------------------------------
+
+(defn add-element [data]
+  (log "6 Add something to the DOM" data)
+  (let [notification (dommy/set-style! (dommy/create-element :div)
+              :position "fixed"
+              :width "200px"
+              :height "150px"
+              :background-color "#ffffff"
+              :top "0px"
+              :right "0px"
+              :padding "20px")]
+    (doseq [name (map #(get % "name") data)]
+      (dommy/append! notification
+        (dommy/set-text!
+          (dommy/create-element :li)
+            name)))
+    (dommy/append! (sel1 :body) notification)))
 
 ; -- a message loop ---------------------------------------------------------------------------------------------------------
 
@@ -15,6 +33,7 @@
         data (get message "data")]
     (case type
       "log" (log "CONTENT SCRIPT: " data)
+      "dom" (add-element data)
       nil)))
 
 
@@ -29,7 +48,7 @@
 ; -- a simple page analysis  ------------------------------------------------------------------------------------------------
 
 (defn do-page-analysis! [background-port]
-  (when-let [scraped (first (sel [".rk-cover-image .container h2"]))]
+  (when-let [scraped (sel1 [".rk-cover-image .container h2"])]
     (post-message! background-port (clj->js {:type "scrape"
                                              :data (dommy/text scraped)}))))
 

@@ -17,9 +17,12 @@
 ; -- api request ------------------------------------------------------------------------------------------------------------
 
 (def request-url "http://www.roomkey.com/j/autofill")
+; (def request-url "http://qa1.c0pt3r.com/j/autofill")
 
 (defn handle-api-success [{:keys [_ locations airports]} client]
-  (log "locations" locations))
+  (log "locations" locations)
+  (post-message! client (clj->js {:type "dom"
+                                  :data locations})))
 
 (defn handle-api-error [client {:keys [status status-text]}]
   (log "Uh oh: " status " " status-text))

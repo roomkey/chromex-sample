@@ -22,6 +22,7 @@
   "content_scripts": [
     {
       "matches": [
+        "*://*.c0pt3r.com/*",
         "*://*.roomkey.com/*"
       ],
       "js": [
